@@ -1,0 +1,34 @@
+# Virtual environment
+
+venv/
+
+
+
+
+
+
+
+# Local configuration files
+
+.env
+
+
+
+
+
+
+# Compiled Python files
+
+__pycache__/
+*.pyc
+
+
+
+
+
+
+
+# Logs and temporary files
+
+data/logs/
+data/temp/
