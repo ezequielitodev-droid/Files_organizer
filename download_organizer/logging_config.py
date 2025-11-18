@@ -44,3 +44,51 @@ fh_backup.setLevel(logging.INFO)
 fh_backup.setFormatter(format)
 
 logger_backup.addHandler(fh_backup)
+
+
+
+logger_scan = logging.getLogger("scan")
+logger_scan.setLevel(logging.INFO)
+
+fh_scan = logging.FileHandler(f"{os.getenv("SCAN_FILE_LOG")}", encoding="utf-8")
+fh_scan.setLevel(logging.INFO)
+
+fh_scan.setFormatter(format)
+
+logger_scan.addHandler(fh_scan)
+
+
+
+logger_classify = logging.getLogger("classify")
+logger_classify.setLevel(logging.INFO)
+
+fh_classify = logging.FileHandler(f"{os.getenv("CLASSIFY_FILE_LOG")}", encoding="utf-8")
+fh_classify.setLevel(logging.INFO)
+
+fh_classify.setFormatter(format)
+
+logger_classify.addHandler(fh_classify)
+
+
+
+logger_destination = logging.getLogger("destination")
+logger_destination.setLevel(logging.INFO)
+
+fh_destination = logging.FileHandler(f"{os.getenv("DECIDE_DESTINATION_LOG")}", encoding="utf-8")
+fh_destination.setLevel(logging.INFO)
+
+fh_destination.setFormatter(format)
+
+logger_destination.addHandler(fh_destination)
+
+
+
+logger_organizer = logging.getLogger("organizer")
+logger_organizer.setLevel(logging.INFO)
+
+fh_organizer = logging.FileHandler(f"{os.getenv("ORGANIZER_FILES_LOG")}", encoding="utf-8")
+fh_organizer.setLevel(logging.INFO)
+
+fh_organizer.setFormatter(format)
+
+logger_organizer.addHandler(fh_organizer)
