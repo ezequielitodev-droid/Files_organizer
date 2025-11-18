@@ -38,6 +38,17 @@ fh_copy.setFormatter(format)
 logger_copy.addHandler(fh_copy)
 
 
+
+logger_backup = logging.getLogger("backup")
+logger_backup.setLevel(logging.INFO)
+
+fh_backup = logging.FileHandler(f"{os.getenv("BACKUP_FOLDER_LOG")}", encoding="utf-8")
+fh_backup.setLevel(logging.INFO)
+
+fh_backup.setFormatter(format)
+
+logger_backup.addHandler(fh_backup)
+
 # Funciones para obtener los path's
 
 def get_download_path() -> Path: 
@@ -204,6 +215,192 @@ def get_dev_path() -> Path:
     else:
         path = Path.home() / "Dev"
     
+    return path
+
+def get_audio_path() -> Path:
+
+    """
+    Return the path to the audio folder as a Path object.
+
+    This function reads the environment variable 'AUDIO_PATH' to get the
+    user's audio folder. If the environment variable is not set, it falls
+    back to the default 'Audio' folder inside the user's home directory.
+
+    Returns
+    -------
+    Path
+        A pathlib.Path object pointing to the audio folder.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> path = get_audio_path()
+    >>> isinstance(path, Path)
+    True
+    >>> path.exists()  # The folder may or may not exist yet
+    True or False
+    """
+
+    path = os.getenv("AUDIO_PATH")
+    if path:
+        path = Path(path)
+    else:
+        path = Path.home() / "Audio"
+    return path
+
+def get_video_path() -> Path:
+
+    """
+    Return the path to the video folder as a Path object.
+
+    This function reads the environment variable 'VIDEO_PATH' to get the
+    user's video folder. If the environment variable is not set, it falls
+    back to the default 'Video' folder inside the user's home directory.
+
+    Returns
+    -------
+    Path
+        A pathlib.Path object pointing to the video folder.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> path = get_video_path()
+    >>> isinstance(path, Path)
+    True
+    >>> path.exists()  # The folder may or may not exist yet
+    True or False
+    """
+
+    path = os.getenv("VIDEO_PATH")
+    if path:
+        path = Path(path)
+    else:
+        path = Path.home() / "Video"
+    return path
+
+def get_archives_path() -> Path:
+
+    """
+    Return the path to the archives folder as a Path object.
+
+    This function reads the environment variable 'ARCHIVES_PATH' to get the
+    user's archives folder. If the environment variable is not set, it falls
+    back to the default 'Archives' folder inside the user's home directory.
+
+    Returns
+    -------
+    Path
+        A pathlib.Path object pointing to the archives folder.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> path = get_archives_path()
+    >>> isinstance(path, Path)
+    True
+    >>> path.exists()  # The folder may or may not exist yet
+    True or False
+    """
+
+    path = os.getenv("ARCHIVES_PATH")
+    if path:
+        path = Path(path)
+    else:
+        path = Path.home() / "Archives"
+    return path
+
+def get_executables_path() -> Path:
+
+    """
+    Return the path to the executables folder as a Path object.
+
+    This function reads the environment variable 'EXECUTABLES_PATH' to get the
+    user's executables folder. If the environment variable is not set, it falls
+    back to the default 'Executables' folder inside the user's home directory.
+
+    Returns
+    -------
+    Path
+        A pathlib.Path object pointing to the executables folder.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> path = get_executables_path()
+    >>> isinstance(path, Path)
+    True
+    >>> path.exists()  # The folder may or may not exist yet
+    True or False
+    """
+
+    path = os.getenv("EXECUTABLES_PATH")
+    if path:
+        path = Path(path)
+    else:
+        path = Path.home() / "Executables"
+    return path
+
+def get_code_path() -> Path:
+
+    """
+    Return the path to the code folder as a Path object.
+
+    This function reads the environment variable 'CODE_PATH' to get the
+    user's code folder. If the environment variable is not set, it falls
+    back to the default 'Code' folder inside the user's home directory.
+
+    Returns
+    -------
+    Path
+        A pathlib.Path object pointing to the code folder.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> path = get_code_path()
+    >>> isinstance(path, Path)
+    True
+    >>> path.exists()  # The folder may or may not exist yet
+    True or False
+    """
+
+    path = os.getenv("CODE_PATH")
+    if path:
+        path = Path(path)
+    else:
+        path = Path.home() / "Code"
+    return path
+
+def get_backup_path() -> Path:
+
+    """
+    Return the path to the backup folder as a Path object.
+
+    This function reads the environment variable 'BACKUP_PATH' to get the
+    user's backup folder. If the environment variable is not set, it falls
+    back to the default 'data/backups' folder inside the project directory.
+
+    Returns
+    -------
+    Path
+        A pathlib.Path object pointing to the backup folder.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> path = get_backup_path()
+    >>> isinstance(path, Path)
+    True
+    >>> path.exists()  # The folder may or may not exist yet
+    True or False
+    """
+    path = os.getenv("BACKUP_PATH")
+    if path:
+        path = Path(path)
+    else:
+        # Default fallback inside project folder
+        path = Path(__file__).parent.parent / "data" / "backups"
     return path
 
 # Funciones de verificacion:
@@ -493,8 +690,6 @@ def safe_move_file(src: Path, dst: Path) -> None:
         
         logger_move.error(f"An unexpected error occurred while moving file: {e}")
 
-
-
 def safe_copy_file(src: Path, dst: Path) -> None: 
     
     """
@@ -553,3 +748,64 @@ def safe_copy_file(src: Path, dst: Path) -> None:
     except Exception as e:
 
         logger_copy.error(f"Unexpected error while copying file: {e}")
+
+def backup_folder(src: Path, dst: Path) -> None:
+
+    """
+    Perform a full backup of a folder to a destination path.
+
+    This function copies all files and subfolders from `src` to `dst`. 
+    If subfolders already exist in the destination, they are merged
+    without raising errors, preserving existing content. Individual files
+    are copied with `shutil.copy2()`, maintaining metadata such as
+    modification time.
+
+    Parameters
+    ----------
+    src : Path
+        The source folder to backup.
+    dst : Path
+        The destination folder where the backup will be stored.
+
+    Notes
+    -----
+    - If `src` does not exist, the function logs a warning and stops.
+    - If `dst` does not exist, it is created automatically.
+    - Existing subfolders in `dst` are preserved and merged.
+    - Logging is performed for successful backups, warnings, and errors.
+
+    Examples
+    --------
+    >>> from pathlib import Path
+    >>> backup_folder(Path("C:/Users/Ezequiel/Downloads"),
+    ...               Path("E:/Backups/2025-11-17_17-00"))
+    # Copies all files and folders from Downloads into the backup folder.
+
+    >>> backup_folder(Path("C:/Users/Ezequiel/Documents/Projects"),
+    ...               Path("E:/Backups/Projects"))
+    # Copies the Projects folder and all its contents to the backup location.
+    """
+
+    try:
+
+        if not src.exists(): raise FileNotFoundError(f"Source does not exist: {src}")
+
+        ensure_folder_exists(dst)
+
+        for item in src.iterdir():
+            target = dst / item.name
+
+            if item.is_dir():
+                shutil.copytree(item, target, dirs_exist_ok=True)
+            else:
+                shutil.copy2(item, target)
+
+        logger_backup.info(f"Backup successfully: {src} -> {dst}")
+
+    except FileNotFoundError as e:
+        
+        logger_backup.warning(f"Backup failed: {e}")
+
+    except Exception as e:
+
+        logger_backup.error(f"Unexpected error backup: {e}")
