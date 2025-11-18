@@ -1,4 +1,4 @@
-from download_organizer.utils import (
+from files_organizer.utils import (
     get_documents_path,
     get_pictures_path,
     get_audio_path,

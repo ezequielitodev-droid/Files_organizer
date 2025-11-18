@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-#Configuramos los Logging:
+# Setting up Logging:
 
 format = logging.Formatter(
     fmt="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
@@ -86,7 +86,7 @@ logger_destination.addHandler(fh_destination)
 logger_organizer = logging.getLogger("organizer")
 logger_organizer.setLevel(logging.INFO)
 
-fh_organizer = logging.FileHandler(f"{os.getenv("ORGANIZER_FILES_LOG")}", encoding="utf-8")
+fh_organizer = logging.FileHandler(f"{os.getenv("RUN_ORGANIZER_LOG")}", encoding="utf-8")
 fh_organizer.setLevel(logging.INFO)
 
 fh_organizer.setFormatter(format)

@@ -1,22 +1,22 @@
+from datetime import date
 import os
-from download_organizer.utils import (
-    backup_folder,
-    safe_move_file
-)
 from pathlib import Path
-from download_organizer.organizer import (
-    extension_to_category,
-    category_to_path,
-    TEMPORARY_EXTENSIONS
-)
-from download_organizer.logging_config import (
+from dotenv import load_dotenv
+
+from files_organizer.logging_config import (
     logger_scan,
     logger_classify,
     logger_destination,
     logger_organizer
 )
-from dotenv import load_dotenv
-from datetime import date
+from files_organizer.organizer import (
+    extension_to_category,
+    category_to_path
+)
+from files_organizer.utils import (
+    backup_folder,
+    safe_move_file
+)
 
 load_dotenv()
 
@@ -139,8 +139,10 @@ def decide_destination(classify: str) -> Path | None:
 
     return destination
 
-def organizer_files(src: Path) -> None:
+# The organizer function changes depending on the organization:
 
+def run_organizer(src: Path) -> None:
+    
     """
     Organize files in a directory by creating a backup, scanning, classifying, and moving them.
 

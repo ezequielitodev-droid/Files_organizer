@@ -2,13 +2,11 @@ import os
 import shutil
 from pathlib import Path
 from dotenv import load_dotenv
-from download_organizer.logging_config import logger_move, logger_copy, logger_backup
-
-#Cargamos funciones de entorno:
+from files_organizer.logging_config import logger_move, logger_copy, logger_backup
 
 load_dotenv()
 
-# Funciones para obtener los path's
+# Functions to retrieve paths
 
 def get_download_path() -> Path: 
     
@@ -362,7 +360,7 @@ def get_backup_path() -> Path:
         path = Path(__file__).parent.parent / "data" / "backups"
     return path
 
-# Funciones de verificacion:
+# Verification functions
 
 def ensure_folder_exists(path: Path) -> None:
 
@@ -392,7 +390,7 @@ def ensure_folder_exists(path: Path) -> None:
 
     path.mkdir(parents=True, exist_ok=True)
 
-# Funciones de manipulacion de rutas:
+# Path‑manipulation functions
 
 def join_path(base: Path, *sub_folders: str) -> Path:
 
@@ -452,7 +450,7 @@ def get_file_extension(file: Path) -> str:
 
     return file.suffix[1:] if file.suffix else ""
 
-# Funciones de filtrado y de busqueda:
+# Filtering and search functions
 
 def list_files_in_folder(folder: Path, extensions: list[str] | None = None) -> list[Path]:
     
@@ -519,7 +517,7 @@ def list_folder_in_folder(folder: Path) -> list[Path]:
         if (f.is_dir())
     ]
 
-# Funciones para mover y organizar sin sobreescribir nada:
+# Functions to move and organize files without overwriting anything
 
 def get_unique_filename(file: Path) -> Path:
     
