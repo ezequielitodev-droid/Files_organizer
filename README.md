@@ -1,6 +1,6 @@
 # Files Organizer
 
-Un organizador de archivos que clasifica y mueve archivos automáticamente según su tipo, creando backups antes de modificar cualquier archivo. Ideal para mantener tus carpetas de descargas ordenadas.
+Un organizador de archivos que clasifica y mueve archivos automáticamente según su tipo, creando backups antes de modificar cualquier archivo. Ideal para mantener tus carpetas bien ordenadas.
 
 ## 📂 Estructura del proyecto
 
@@ -115,6 +115,8 @@ pyinstaller --onefile --add-data ".env;." main.py
 
 ## 📝 Notas
 
-- No se incluyen archivos de pruebas ni venv en el ejecutable.
+- No se incluye venv en el ejecutable.
+
+- Se incluye la carpeta test para facilitar pruebas, la misma tiene los testers de cada archivo de paquete principal junto con una estructura de carpetas que busca simular un computador.
 
 - Las variables de entorno se usan para modularidad y privacidad.
