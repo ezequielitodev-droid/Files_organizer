@@ -1,8 +1,31 @@
 import logging
 import os
 from dotenv import load_dotenv
+from pathlib import Path
+from files_organizer.resource_loader import load_env
 
-load_dotenv()
+load_env()
+
+def create_log_structure() -> None:
+
+    Path(f"{os.getenv("FODER_SAFE_MOVE_FILE")}").mkdir(parents=True, exist_ok=True)
+
+    structure = [
+        os.getenv("SAFE_MOVE_FILE_LOG"), 
+        os.getenv("SAFE_COPY_FILE_LOG"), 
+        os.getenv("BACKUP_FOLDER_LOG"), 
+        os.getenv("SCAN_FILE_LOG"), 
+        os.getenv("CLASSIFY_FILE_LOG"), 
+        os.getenv("DECIDE_DESTINATION_LOG"),
+        os.getenv("RUN_ORGANIZER_LOG")
+    ]
+
+    for file_path in structure:
+        file = Path(f"{file_path}")
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.touch(exist_ok=True)
+
+create_log_structure()
 
 # Setting up Logging:
 

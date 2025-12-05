@@ -578,48 +578,50 @@ def get_unique_filename(file: Path) -> Path:
 def safe_move_file(src: Path, dst: Path) -> None:
 
     """
-    Safely move a file to a destination path while preventing accidental overwrites
-    and avoiding operations on directories.
+        Safely move a file to a destination path while preventing accidental overwrites
+        and avoiding operations on directories.
 
-    This function moves a file from `src` to `dst`. If `dst` is a directory, the file
-    is placed inside it using its original filename. If a file with the same name
-    already exists at the destination, a unique filename is generated automatically
-    via `get_unique_filename()` to prevent overwriting.
+        This function moves a file from `src` to `dst`. If `dst` is a directory, the file
+        is placed inside it using its original filename. If a file with the same name
+        already exists at the destination, a unique filename is generated automatically
+        via `get_unique_filename()` to prevent overwriting.
 
-    Several safety checks are enforced:
-    - The source path must exist.
-    - The destination path must exist.
-    - The source must not be a directory. If it is, the operation is aborted.
-    - If the destination is a directory, the final target path becomes `dst/src.name`.
+        Several safety checks are enforced:
+        - The source path must exist.
+        - The destination path must exist.
+        - The source must not be a directory. If it is, the operation is aborted.
+        - If the destination is a directory, the final target path becomes `dst/src.name`.
 
-    The move operation is handled by `shutil.move()`. Any issues such as missing paths
-    or unexpected errors are logged. Directory sources trigger a warning and are not moved.
+        The move operation is handled by `shutil.move()`. Any issues such as missing paths
+        or unexpected errors are logged. Directory sources trigger a warning and are not moved.
 
-    Parameters
-    ----------
-    src : Path
-        The source file path.
-    dst : Path
-        The destination path or directory.
+        Parameters
+        ----------
+        src : Path
+            The source file path.
+        dst : Path
+            The destination path or directory.
 
-    Notes
-    -----
-    - If `src` does not exist, a warning is logged and nothing is moved.
-    - If `dst` does not exist, the function logs a warning and stops.
-    - If `src` is a directory, an `IsADirectoryError` is raised and logged, and the
-      operation is aborted.
-    - Unique filenames are handled by `get_unique_filename()`.
-    - All warnings and errors are logged using `logger_move`.
+        Notes
+        -----
+        - If `src` does not exist, a warning is logged and nothing is moved.
+        - If `dst` does not exist, the function logs a warning and stops.
+        - If `src` is a directory, an `IsADirectoryError` is raised and logged, and the
+          operation is aborted.
+        - Unique filenames are handled by `get_unique_filename()`.
+        - **MANEJO DE EXCEPCIONES**: Se utilizan bloques `try...except` para garantizar la continuidad del proceso:
+          - **`PermissionError`**: Los archivos protegidos o que requieren permisos de administrador se registran y se omiten.
+          - **`OSError`**: Se detectan específicamente los archivos bloqueados o en uso (ej. Windows Error 32) para omitirlos de forma segura.
+        - All warnings and errors are logged using `logger_move`.
 
-    Examples
-    --------
-    >>> safe_move_file(Path("Downloads/photo.jpg"), Path("Documents/"))
-    # Moves 'photo.jpg' into Documents, generating a unique name if needed.
+        Examples
+        --------
+        >>> safe_move_file(Path("Downloads/photo.jpg"), Path("Documents/"))
+        # Moves 'photo.jpg' into Documents, generating a unique name if needed.
 
-    >>> safe_move_file(Path("Downloads/photo.jpg"), Path("Documents/photo.jpg"))
-    # Moves to the exact file target, renaming if the file already exists.
+        >>> safe_move_file(Path("Downloads/photo.jpg"), Path("Documents/photo.jpg"))
+        # Moves to the exact file target, renaming if the file already exists.
     """
-
 
     try:
 
@@ -629,12 +631,21 @@ def safe_move_file(src: Path, dst: Path) -> None:
 
         if src.is_dir(): raise IsADirectoryError(f"Source is a directory, not a file: {src}")
 
-        if dst.is_dir(): dst = dst / src.name
+        if dst.is_dir():
+            target_path = dst / src.name
+        else:
+            target_path = dst
 
-        shutil.move(src, get_unique_filename(dst))
+        final_destination = get_unique_filename(target_path)
 
-        logger_move.info(f"File moved successfully: {src} -> {dst}")
+        shutil.move(src, final_destination)
 
+        logger_move.info(f"File moved successfully: {src} -> {final_destination}")
+
+    except PermissionError:
+
+        logger_move.warning(f"PERMISSION DENIED: Could not move '{src}'. (Admin/System?)")
+    
     except FileNotFoundError as e:
         
         logger_move.warning(f"Error moving file: {e}")
@@ -642,6 +653,14 @@ def safe_move_file(src: Path, dst: Path) -> None:
     except IsADirectoryError as e:
 
         logger_move.warning("Source path is a directory. Operation aborted.")
+
+    except OSError as e:
+        # Detectar si el archivo está "ocupado" (Error 32 en Windows)
+        if hasattr(e, 'winerror') and e.winerror == 32:
+             logger_move.warning(f"EN USO: '{src}' está abierto en otro programa. Se omitió.")
+        else:
+             # Cualquier otro error de disco/sistema
+             logger_move.error(f"Error de sistema (OS) con '{src}': {e}")
 
     except Exception as e:
         
@@ -671,6 +690,8 @@ def safe_copy_file(src: Path, dst: Path) -> None:
     - If `src` does not exist, the function logs a warning and stops.
     - If `dst` does not exist, the function logs a warning and stops.
     - If `dst` is a file path, the copied file will replace only the filename part.
+    - **VERIFICACIÓN DE FUENTE**: Se aborta la operación si `src` es un directorio (debe ser un archivo).
+    - **MANEJO DE EXCEPCIONES**: Se utiliza un manejo específico de errores para asegurar la continuidad del proceso.
     - `get_unique_filename()` ensures the resulting file path is unique.
     - All outcomes (success, warnings, errors) are written to the log.
 
@@ -678,11 +699,11 @@ def safe_copy_file(src: Path, dst: Path) -> None:
     --------
     >>> from pathlib import Path
     >>> safe_copy_file(Path("C:/Users/Ezequiel/Downloads/photo.jpg"),
-    ...                Path("C:/Users/Ezequiel/Documents/"))
+    ...                         Path("C:/Users/Ezequiel/Documents/"))
     # Copies 'photo.jpg' into the Documents folder, renaming if needed.
 
     >>> safe_copy_file(Path("C:/Users/Ezequiel/Downloads/photo.jpg"),
-    ...                Path("C:/Users/Ezequiel/Documents/photo.jpg"))
+    ...                         Path("C:/Users/Ezequiel/Documents/photo.jpg"))
     # Copies the file to an explicit path, generating a unique name if needed.
     """
     
@@ -692,16 +713,31 @@ def safe_copy_file(src: Path, dst: Path) -> None:
         
         if not dst.exists(): raise FileNotFoundError(f"Destination folder does not exist: {dst}")
 
-        if dst.is_dir(): dst = dst / src.name
+        if dst.is_dir(): dst_target = dst / src.name
+        else: dst_target = dst
 
-        shutil.copy2(src, get_unique_filename(dst))
+        final_destination = get_unique_filename(dst_target)
 
-        logger_copy.info(f"File copied successfully: {src} -> {dst}")
+        shutil.copy2(src, final_destination)
+
+        logger_copy.info(f"File copied successfully: {src} -> {final_destination}")
+
+    except PermissionError:
+        
+        logger_copy.warning(f"PERMISSION DENIED: Could not copy '{src}'. (Admin/System?)")
 
     except FileNotFoundError as e:
 
         logger_copy.warning(f"File copy failed: {e}")
 
+    except OSError as e:
+        # Detectar si el archivo está "ocupado" (Error 32 en Windows)
+        if hasattr(e, 'winerror') and e.winerror == 32:
+             logger_copy.warning(f"FILE IN USE: '{src}' is currently open. Skipped.")
+        else:
+             # Cualquier otro error de disco/sistema
+             logger_copy.error(f"OS Error while copying '{src}': {e}")
+    
     except Exception as e:
 
         logger_copy.error(f"Unexpected error while copying file: {e}")

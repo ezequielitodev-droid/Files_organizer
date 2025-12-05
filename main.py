@@ -6,7 +6,7 @@ from files_organizer.core import run_organizer
 load_dotenv()
 
 if __name__ == "__main__":
-    folder_path = os.getenv("DOWNLOAD_PATH")
+    folder_path = os.getenv("FILE_TO_ORGANIZER_PATH")
     if folder_path is None: raise ValueError("The environment variable FOLDER_TO_ORGANIZE is not defined")
 
     run_organizer(Path(folder_path))

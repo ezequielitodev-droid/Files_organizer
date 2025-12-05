@@ -56,13 +56,25 @@ Crear un archivo .env con las variables necesarias:
 Crear variables de entorno con las direcciones importantes de tu computador, con los path que puedas querer usar
 
 Ejemplo:
-FOLDER_TO_ORGANIZE=C:/Users/Ezequielito/Downloads
-BACKUP_PATH=D:/Backup
+FOLDER_TO_ORGANIZE = C:/Users/Ezequielito/Downloads
+BACKUP_PATH = D:/Backup
 
+
+DOWNLOAD_PATH =  
+DOCUMENTS_PATH =  
+DESKTOP_PATH =  
+PICTURES_PATH =  
+AUDIO_PATH =  
+VIDEO_PATH =  
+ARCHIVES_PATH =  
+EXECUTABLES_PATH =  
+CODE_PATH =  
 
 Abajo de adjunta las variables de entorno para controlar con los loggins:
 
 Se deben completar con las tus rutas correspondientes de donde estan los respectivos archivos .log
+
+FODER_SAFE_MOVE_FILE = 
 
 SAFE_MOVE_FILE_LOG = 
 SAFE_COPY_FILE_LOG = 
