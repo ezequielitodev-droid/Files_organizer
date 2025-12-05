@@ -95,3 +95,19 @@ category_to_path = {
 
 
 TEMPORARY_EXTENSIONS = [".crdownload", ".part", ".tmp"]
+
+IGNORE_SUFFIXES = {
+    '.tmp',     # Archivos temporales de Windows/aplicaciones
+    '.crdownload', # Descargas parciales de Chrome
+    '.part',    # Descargas parciales de Firefox
+    '.lock',    # Archivos de bloqueo
+    '.log',     # Archivos de registro
+    '.mdb-shm', # Archivos temporales de SQLite
+}
+
+IGNORE_NAMES = {
+    'desktop.ini',
+    'thumbs.db',
+    'icon\r',   # Archivo de icono de macOS/otros
+    'PowerShell' #Para ignorar mi configuracion que esta en documentos
+}

@@ -11,7 +11,9 @@ from files_organizer.logging_config import (
 )
 from files_organizer.organizer import (
     extension_to_category,
-    category_to_path
+    category_to_path,
+    IGNORE_SUFFIXES,
+    IGNORE_NAMES
 )
 from files_organizer.utils import (
     backup_folder,
@@ -63,7 +65,16 @@ def scan_files(src: Path) -> list:
         if not src.is_dir(): raise FileNotFoundError(f"Source path is not a directory: {src}")
 
         for item in src.iterdir():
-            if item.is_file(): list_src.append(item)
+            if (
+                item.is_file() and 
+                
+                item.name.lower() not in IGNORE_NAMES and 
+                
+                item.suffix.lower() not in IGNORE_SUFFIXES and 
+                
+                not item.name.startswith('.')
+            ):
+                list_src.append(item)
 
         logger_scan.info(f"Scan completed successfully. Items found: {len(list_src)}")
     

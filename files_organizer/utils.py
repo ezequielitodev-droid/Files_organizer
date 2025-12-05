@@ -743,7 +743,7 @@ def safe_copy_file(src: Path, dst: Path) -> None:
         logger_copy.error(f"Unexpected error while copying file: {e}")
 
 def backup_folder(src: Path, dst: Path) -> None:
-
+    
     """
     Perform a full backup of a folder to a destination path.
 
@@ -762,6 +762,9 @@ def backup_folder(src: Path, dst: Path) -> None:
 
     Notes
     -----
+    - **MODIFICACIÓN DE ROBUSTEZ:** El manejo de errores (try/except) se realiza dentro del bucle
+      para asegurar que los errores de Permiso (WinError 5) y otros fallos no detengan
+      el backup completo, permitiendo omitir archivos/carpetas inaccesibles y continuar.
     - If `src` does not exist, the function logs a warning and stops.
     - If `dst` does not exist, it is created automatically.
     - Existing subfolders in `dst` are preserved and merged.
@@ -771,34 +774,38 @@ def backup_folder(src: Path, dst: Path) -> None:
     --------
     >>> from pathlib import Path
     >>> backup_folder(Path("C:/Users/Ezequiel/Downloads"),
-    ...               Path("E:/Backups/2025-11-17_17-00"))
+    ...              Path("E:/Backups/2025-11-17_17-00"))
     # Copies all files and folders from Downloads into the backup folder.
-
-    >>> backup_folder(Path("C:/Users/Ezequiel/Documents/Projects"),
-    ...               Path("E:/Backups/Projects"))
-    # Copies the Projects folder and all its contents to the backup location.
     """
-
+    
     try:
-
         if not src.exists(): raise FileNotFoundError(f"Source does not exist: {src}")
+    except FileNotFoundError as e:
+        logger_backup.warning(f"Backup failed: {e}")
+        return
 
-        ensure_folder_exists(dst)
+    ensure_folder_exists(dst)
 
-        for item in src.iterdir():
-            target = dst / item.name
+    for item in src.iterdir():
+        target = dst / item.name
 
+        try:
+            # Lógica principal de copiado
             if item.is_dir():
                 shutil.copytree(item, target, dirs_exist_ok=True)
             else:
                 shutil.copy2(item, target)
 
-        logger_backup.info(f"Backup successfully: {src} -> {dst}")
-
-    except FileNotFoundError as e:
+        except PermissionError as e:
+            logger_backup.error(f"Acceso denegado al hacer backup de {item}. Omitiendo carpeta/archivo.")
+            continue
         
-        logger_backup.warning(f"Backup failed: {e}")
+        except FileNotFoundError as e:
+            logger_backup.warning(f"Error File Not Found en {item}: {e}")
+            continue
+            
+        except Exception as e:
+            logger_backup.error(f"Unexpected error backup en {item}: {e}")
+            continue
 
-    except Exception as e:
-
-        logger_backup.error(f"Unexpected error backup: {e}")
+    logger_backup.info(f"Backup completed successfully: {src} -> {dst}")
